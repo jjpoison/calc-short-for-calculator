@@ -1,3 +1,6 @@
+# !!!
+# only works in terminal
+
 first_number = float(input("Enter a number: "))
 second_number = float(input("Enter your second number: "))  # allow multiple numbers?
 
@@ -27,4 +30,5 @@ if answer is not None:
         print("Invalid input.")
     print(f"The total is {answer}.")
 else:
+
     print("Calculations could not be performed.")
