@@ -1,12 +1,5 @@
 import tkinter
 
-# accent color preset picker
-accent_red = "#BE1A0B"
-accent_purple = "#D5D839"
-accent_orange = "#EA6B21"
-accent_green = "#2FFF00" #appy
-accent_purple = "#BB2AC3"
-
 white = "#FFFFFF"
 gray_light = "#80868B"
 gray_dark = "#3C4043"
@@ -15,18 +8,18 @@ preset_accent = "#00A2E8"
 
 # arithemtics (grid)
 button_values = [
-    ["AC", "+/-", "^", "sin", "÷"],
-    ["7", "8", "9", "cos", "x"],
-    ["4", "5", "6", "tan", "-"],
-    ["1", "2", "3", "%", "+"],
-    [".", "0", "=", "π", "√"]
+    ["AC", "+/-", "%", "÷"],
+    ["7", "8", "9", "x"],
+    ["4", "5", "6", "-"],
+    ["1", "2", "3", "+"],
+    [".", "0", "=", "√"]
 ]
 
 row_count = len(button_values) # 5
 column_count = len(button_values[0]) # 5
 
-right_symbols = ["÷", "x", "-", "+", "√", "sin", "cos", "tan", "%", "π"]
-top_symbols = ["AC", "+/-", "^"]
+right_symbols = ["÷", "x", "-", "+", "√"]
+top_symbols = ["AC", "+/-", "%"]
 
 # window
 window = tkinter.Tk()
@@ -76,7 +69,7 @@ frame.pack()
 # arithemtic logic (A, operator, B)
 A = "0"
 operator = None
-B = None
+#B = None
 
 def clear_all():
     global A, B, operator
@@ -85,43 +78,63 @@ def clear_all():
     B = None
 
 def remove_zero_decimal(num):
-    if num % 1 == 0:
-        num = int(num)
+    if isinstance(num, float):
+        if num.is_integer():
+            return str(int(num))
+        else:
+            return str(num)
     return str(num)
 
 def button_clicked(value):
-    global right_symbols, top_symbols, label, A, B, operator
+    global label, A, operator
 
-    if value in right_symbols: # operator symbols and =
-        if value in "+-x÷":
-            if operator is None: # A will remain the same if the operator changes
-                A = label["text"]
-                label["text"] = "0"
-                B = "0"
+    # debugging
+    print(f"Button pressed: {value}")
+    print(f"Current A: {A}, operator: {operator}")
 
-            operator = value
+    # operator symbols and =
+    if value in ["+", "-", "x", "÷"]:
+        A = label["text"]
+        operator = value
+        label["text"] = "0"
 
-        elif value == "=":
-            if A is not None and operator is not None:
-                B = label["text"]
+    elif value == "=":
+        if A is not None and operator is not None:
+            B = label["text"]
+            
+            try:
                 numA = float(A)
                 numB = float(B)
 
                 if operator == "+":
-                    label["text"] = remove_zero_decimal(numA + numB)
-                elif operator == "-":
-                    label["text"] = remove_zero_decimal(numA - numB)
-                elif operator == "x":
-                    label["text"] = remove_zero_decimal(numA * numB)
-                elif operator == "÷":
-                    label["text"] = remove_zero_decimal(numA / numB)
+                    result = remove_zero_decimal(numA + numB)
 
+                elif operator == "-":
+                    result = remove_zero_decimal(numA - numB)
+
+                elif operator == "x":
+                    result = remove_zero_decimal(numA * numB)
+
+                elif operator == "÷":
+                    if numB == 0:
+                        label["text"] = "Error"
+                        clear_all()
+                        return
+                    result = remove_zero_decimal(numA / numB)
+
+                label["text"] = result
+                A = result
+                operator = None
+
+            except ValueError:
+                label["text"] = "Error"
                 clear_all()
 
     elif value in top_symbols: # AC, +/-, %
         if value == "AC":
             clear_all()
             label["text"] = "0"
+
         elif value == "+/-":
             result = float(label["text"]) * -1
             label["text"] = remove_zero_decimal(result)
@@ -132,8 +145,8 @@ def button_clicked(value):
 
     else: # digit or .
         if value == ".":
-            if value not in label["text"]:
-                label["text"] += value # only adds one decimal .
+            if "." not in label["text"]:
+                label["text"] += "." # only adds one decimal .
         elif value in "0123456789":
             if label["text"] == "0": # relace 0 with digit inputed
                 label["text"] = value
